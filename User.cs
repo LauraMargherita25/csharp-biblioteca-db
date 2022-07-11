@@ -11,13 +11,15 @@ namespace csharp_biblioteca
     {
         public string Surname { get;  set; }
         public string Name { get; set; }
-        
-        
-        public User(string surname, string name)
+        public string Email { get; set; }
+        public string Password { get; set; }
+
+        public User(string surname, string name, string email, string password)
         {
             this.Surname = surname; 
             this.Name = name;
-            
+            this.Email = email;
+            this.Password = password;
         }
 
     }
