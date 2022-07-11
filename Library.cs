@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,23 +9,16 @@ namespace csharp_biblioteca
 {
     public class Library
     {
-        List<Item> products = new List<Item>();
-        List<User> users = new List<User>();
-        List<Lendal> landals = new List<Lendal>();
+        public List<User> users = new List<User>();
+        public List<Item> products = new List<Item>();
+        public List<Lendal> landals = new List<Lendal>();
+
+        
+        SqlConnection connectionToLibraryDb = new SqlConnection("Data Source=localhost; Initial Catalog=library-db; Integrated Security=True");
         public void OpenLibrary()
         {
             Console.WriteLine("Benvenuto nella Biblioteca Online");
             this.MenuSignupOrLogin();
-        }
-
-        public void AddNewPreoduct(Item newProduct)
-        {
-            this.products.Add(newProduct);
-        }
-
-        internal void AddNewUser(User newUser)
-        {
-            this.users.Add(newUser);
         }
 
         public void MenuSignupOrLogin()
@@ -37,66 +31,80 @@ namespace csharp_biblioteca
             {
                 this.SignupNewUser();
             } 
-            else if (input == "si")
-            {
-                this.LoginUser();
-            }
-            //else { 
-            //    this.MenuSignupOrLogin(); 
+            //else if (input == "si")
+            //{
+            //    this.LoginUser();
             //}
+           
         }
         public void SignupNewUser()
         {
-            Console.Write("Cognome: ");
-            string inputSurname = Console.ReadLine();
             Console.Write("Nome: ");
             string inputNname = Console.ReadLine();
-            Console.Write("Email: ");
-            string inputEmail = Console.ReadLine();
-            Console.Write("Password: ");
-            string inputPassword = Console.ReadLine();
-            Console.Write("Numero di telefono: ");
-            uint inputTelephone = uint.Parse(Console.ReadLine());
+            Console.Write("Cognome: ");
+            string inputSurname = Console.ReadLine();
 
-            User newUser = new User(inputSurname, inputNname, inputEmail, inputPassword, inputTelephone);
-            users.Add(newUser);
+            try
+            {
+                connectionToLibraryDb.Open();
+
+                string query = "INSERT INTO users (name, surname) VALUES (@name, @surname)";
+
+                SqlCommand cmd = new SqlCommand(query, connectionToLibraryDb);
+                cmd.Parameters.Add(new SqlParameter("@name", inputNname));
+                cmd.Parameters.Add(new SqlParameter("@surname", inputSurname));
+
+                int affectedRows = cmd.ExecuteNonQuery();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                connectionToLibraryDb.Close();
+            }
+
+            //User newUser = new User(inputSurname, inputNname);
+            //users.Add(newUser);
 
             Console.WriteLine("Ciao {0} {1}", inputNname, inputNname);
         }
 
-        public void LoginUser()
-        {
-            Console.WriteLine("Email");
-            string inputEmail = Console.ReadLine();
-            Console.WriteLine("Password");
-            string inputPassword = Console.ReadLine();
-            bool notFound = true;
+        //public void LoginUser()
+        //{
+        //    Console.WriteLine("Email");
+        //    string inputEmail = Console.ReadLine();
+        //    Console.WriteLine("Password");
+        //    string inputPassword = Console.ReadLine();
+        //    bool notFound = true;
 
-            do
-            {
-                foreach (User user in this.users)
-                {
-                    if (user.Email == inputEmail && user.Password == inputPassword)
-                    {
-                        notFound = false;
-                        Console.WriteLine("Ciao {0} {1}", user.Name, user.Surname);
-                    }
+        //    do
+        //    {
+        //        foreach (User user in this.users)
+        //        {
+        //            if (user.Email == inputEmail && user.Password == inputPassword)
+        //            {
+        //                notFound = false;
+        //                Console.WriteLine("Ciao {0} {1}", user.Name, user.Surname);
+        //            }
                     
-                }
+        //        }
 
-                if (notFound)
-                {
-                    Console.WriteLine("Nessuno utente trovato, registrati!");
-                    this.SignupNewUser();
-                }
-                else
-                {
-                    this.menuSearchItem();
-                }
-            }
-            while (notFound);
+        //        if (notFound)
+        //        {
+        //            Console.WriteLine("Nessuno utente trovato, registrati!");
+        //            this.SignupNewUser();
+        //        }
+        //        else
+        //        {
+        //            this.menuSearchItem();
+        //        }
+        //    }
+        //    while (notFound);
 
-        }
+        //}
 
         public void menuSearchItem()
         {
